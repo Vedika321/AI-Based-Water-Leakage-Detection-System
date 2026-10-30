@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flowwatch — Water Network Health</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-body: #f4f5f7;
+            --bg-sidebar: #0f141c;
+            --bg-card: #ffffff;
+            --border-subtle: #e2e5ea;
+            --border-card: #e8ecf1;
+            --text-main: #131b26;
+            --text-muted: #6e7987;
+            --text-heading: #0b1320;
+            --teal-primary: #0f766e;
+            --teal-hover: #0d5f58;
+            --teal-light: #ecfdf5;
+            --teal-border: #a7f3d0;
+            --teal-text: #065f46;
+            --danger-bg: #fff1f2;
+            --danger-border: #fecdd3;
+            --danger-text: #e11d48;
+            --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            --shadow-card: 0 4px 12px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        aside.sidebar {
+            width: 240px;
+            background: var(--bg-sidebar);
+            color: #94a3b8;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 24px 16px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 12px 28px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 24px;
+        }
+
+        .brand-logo svg {
+            color: #38bdf8;
+        }
+
+        .brand-title {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 19px;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item.active a, .nav-item a:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-item.active a {
+            background: rgba(56, 189, 248, 0.12);
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+        main.main-content {
+            flex: 1;
+            padding: 32px 40px;
+            overflow-y: auto;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .breadcrumbs {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .top-pills {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-pill {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .pill-running {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .pill-tag {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-date {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-heading);
+            margin-bottom: 6px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            align-self: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            font-family: inherit;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            color: #334155;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .btn-danger-outline {
+            background: #ffffff;
+            border: 1px solid #fecdd3;
+            color: #e11d48;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-danger-outline:hover {
+            background: #fff1f2;
+        }
+
+        .btn-primary {
+            background: var(--teal-primary);
+            color: white;
+            border: 1px solid var(--teal-primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--teal-hover);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 20px 22px;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px -2px rgba(15, 23, 42, 0.06);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .kpi-value {
+            font-size: 34px;
+            font-weight: 800;
+            color: var(--text-heading);
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .kpi-value span.sub {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-left: 2px;
+        }
+
+        .kpi-note {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .kpi-card.alert-active {
+            border-color: #fda4af;
+            background: linear-gradient(180deg, #fff 0%, #fff5f5 100%);
+        }
+
+        .kpi-card.alert-active .kpi-value {
+            color: #e11d48;
+        }
+
+        .dashboard-row {
+            display: grid;
+            grid-template-columns: 1.7fr 1.3fr;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .panel-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 14px;
+            padding: 22px 24px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 24px;
+        }
+
+        .panel-header-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .panel-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .schematic-canvas-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px dashed #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        svg.schematic-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #1e293b;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: var(--teal-primary);
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        }
+
+        .btn-submit {
+            margin-top: 20px;
+            width: 100%;
+            padding: 13px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            background: var(--teal-primary);
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background: var(--teal-hover);
+        }
+
+        .result-box-card {
+            margin-top: 24px;
+            padding: 22px;
+            border-radius: 12px;
+            border: 1px solid var(--teal-border);
+            background: var(--teal-light);
+        }
+
+        .result-box-card.high-risk {
+            background: var(--danger-bg);
+            border-color: var(--danger-border);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .result-badge {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: #d1fae5;
+            color: var(--teal-text);
+        }
+
+        .result-box-card.high-risk .result-badge {
+            color: var(--danger-text);
+            background: #ffe4e6;
+        }
+
+        .result-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .result-meta-item strong {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+
+        .result-meta-item span {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .reasons-list {
+            list-style: inside disc;
+            margin: 10px 0 16px 0;
+            color: #334155;
+            font-size: 13.5px;
+            line-height: 1.6;
+        }
+
+        .solution-box {
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 13.5px;
+            color: #1e293b;
+            line-height: 1.5;
+        }
+
+        .table-simple {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+
+        .table-simple th, .table-simple td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table-simple th {
+            color: #64748b;
+            font-weight: 600;
+            background: #f8fafc;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-row {
+                grid-template-columns: 1fr;
+            }
+            aside.sidebar {
+                display: none;
+            }
+            main.main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand-logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+            </svg>
+            <span class="brand-title">Flowwatch</span>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item {% if not show_events %}active{% endif %}">
+                <a href="/">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                    Overview
+                </a>
+            </li>
+            <li class="nav-item {% if show_events %}active{% endif %}">
+                <a href="/events">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+                    Event history
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#pipe-inspection">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                    AI Assessment
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <div class="breadcrumbs">
+                <span>Networks</span>
+                <span class="separator">/</span>
+                <span>River District</span>
+            </div>
+            <div class="top-pills">
+                <span class="badge-pill pill-running" id="simPill">● Simulation Running</span>
+                <span class="badge-pill pill-tag">Live Sensor Sync</span>
+            </div>
+        </div>
+
+        <header class="page-header">
+            <div>
+                <div class="header-date">Network Operations Center · Telemetry Feed</div>
+                <h1 class="page-title">Ai Based Water Leakage Detection System</h1>
+                <p class="page-subtitle">Real-time pressure transient analysis, anomaly scoring, and structural integrity modeling</p>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="toggleDemo()" id="pauseBtn">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                    <span id="pauseBtnText">Pause demo</span>
+                </button>
+                <button class="btn btn-danger-outline" onclick="toggleLeak()" id="leakBtn">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span id="leakBtnText">Simulate a leak</span>
+                </button>
+            </div>
+        </header>
+
+        {% if show_events %}
+        <!-- Event History View -->
+        <section class="panel-box">
+            <div class="panel-header-line">
+                <div>
+                    <h2 class="panel-title">Inspection Log & Anomaly Events</h2>
+                    <p class="panel-subtitle">Historical records of pipeline assessments and flagged risks</p>
+                </div>
+            </div>
+            {% if events %}
+            <table class="table-simple">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Brand</th>
+                        <th>Material</th>
+                        <th>Flow (L/s)</th>
+                        <th>Pressure (psi)</th>
+                        <th>Risk Score</th>
+                        <th>Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ev in events %}
+                    <tr>
+                        <td>{{ ev.time }}</td>
+                        <td><strong>{{ ev.brand }}</strong></td>
+                        <td>{{ ev.material }}</td>
+                        <td>{{ ev.flow_rate }}</td>
+                        <td>{{ ev.pressure }}</td>
+                        <td>{{ ev.risk }}/100</td>
+                        <td><span class="badge-pill {% if ev.risk >= 60 %}pill-danger{% else %}pill-tag{% endif %}">{{ ev.risk_level }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="font-size: 14px; color: var(--text-muted); margin-top: 10px;">No assessment events recorded yet.</p>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <!-- KPI Metrics Grid -->
+        <div class="kpi-grid">
+            <div class="kpi-card" id="cardRisk">
+                <div class="kpi-header">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Heuristic Risk
+                </div>
+                <div class="kpi-value"><span id="valRisk">--</span><span class="sub">/100</span></div>
+                <div class="kpi-note" id="lblRisk">Nominal · Illustrative score</div>
+            </div>
+
+            <div class="kpi-card" id="cardFlow">
+                <div class="kpi-header">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    Inlet Flow
+                </div>
+                <div class="kpi-value"><span id="valFlow">--</span><span class="sub">L/s</span></div>
+                <div class="kpi-note">Normal range · max 52.0 L/s</div>
+            </div>
+
+            <div class="kpi-card" id="cardPressure">
+                <div class="kpi-header">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m14 14-4-4"/></svg>
+                    Line Pressure
+                </div>
+                <div class="kpi-value"><span id="valPressure">--</span><span class="sub">psi</span></div>
+                <div class="kpi-note">Normal range · min 50.0 psi</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>
+                    Sensors Online
+                </div>
+                <div class="kpi-value"><span id="valDevices">6</span><span class="sub">/6</span></div>
+                <div class="kpi-note">Telemetry heartbeat sync OK</div>
+            </div>
+        </div>
+
+        <!-- Middle Row: Schematic & Trend -->
+        <div class="dashboard-row">
+            <div class="panel-box">
+                <div class="panel-header-line">
+                    <div>
+                        <div class="panel-title">Network segment view</div>
+                        <div class="panel-subtitle">Telemetry node distribution across River District</div>
+                    </div>
+                    <span class="badge-pill pill-tag">Schematic</span>
+                </div>
+                <div class="schematic-canvas-container">
+                    <svg class="schematic-svg" viewBox="0 0 600 240">
+                        <polyline id="pipePath" points="80,170 180,165 240,75 320,70 380,145 480,140" fill="none" stroke="#0284c7" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+                        <polyline points="240,75 245,210 360,205 380,145" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4" stroke-linejoin="round"/>
+                        <g id="schematicNodes">
+                            <circle cx="80" cy="170" r="8" fill="#ffffff" stroke="#0284c7" stroke-width="3.5"/>
+                            <text x="80" y="200" font-size="10" font-weight="600" fill="#64748b" text-anchor="middle">NORTH INLET</text>
+                            <circle cx="180" cy="165" r="7" fill="#ffffff" stroke="#0284c7" stroke-width="3"/>
+                            <circle cx="240" cy="75" r="8" fill="#ffffff" stroke="#0284c7" stroke-width="3.5"/>
+                            <text x="240" y="55" font-size="10" font-weight="600" fill="#64748b" text-anchor="middle">NORTH RESERVOIR</text>
+                            <circle cx="320" cy="70" r="7" fill="#ffffff" stroke="#0284c7" stroke-width="3"/>
+                            <circle cx="380" cy="145" r="8" fill="#ffffff" stroke="#0284c7" stroke-width="3.5"/>
+                            <text x="400" y="130" font-size="10" font-weight="600" fill="#64748b">EAST BRANCH</text>
+                            <circle cx="480" cy="140" r="7" fill="#ffffff" stroke="#0284c7" stroke-width="3"/>
+                        </g>
+                        <circle id="leakPulse" cx="240" cy="75" r="14" fill="none" stroke="#ef4444" stroke-width="3" style="display: none;">
+                            <animate attributeName="r" values="8;22;8" dur="1.5s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="1;0.1;1" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="panel-box">
+                <div class="panel-header-line">
+                    <div>
+                        <div class="panel-title">Flow & pressure trend</div>
+                        <div class="panel-subtitle">Rolling real-time sensor window</div>
+                    </div>
+                </div>
+                <div style="height: 250px; width: 100%;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pipe Inspection Assessment Form -->
+        <section class="panel-box" id="pipe-inspection">
+            <div class="panel-header-line">
+                <div>
+                    <h2 class="panel-title" style="font-size: 19px;">AI Pipe Inspection & Solution Assessment</h2>
+                    <p class="panel-subtitle">Evaluate physical degradation parameters against dynamic telemetry readings.</p>
+                </div>
+            </div>
+
+            {% if error %}
+            <div class="result-box-card high-risk" style="margin-top: 10px;">
+                <strong style="color: #9f1239;">Assessment Notice:</strong>
+                <span style="color: #881337;">{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form action="/analyze-pipe" method="POST">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="brand">Pipe Brand</label>
+                        <input type="text" id="brand" name="brand" placeholder="e.g., Supreme, Astral, Tata" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="age">Pipe Age (Years)</label>
+                        <input type="number" id="age" name="age" min="0" max="200" placeholder="e.g., 14" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="material">Pipe Material</label>
+                        <select id="material" name="material" required>
+                            <option value="">Select pipe material</option>
+                            <option value="PVC">PVC</option>
+                            <option value="CPVC">CPVC</option>
+                            <option value="HDPE">HDPE</option>
+                            <option value="Iron">Iron</option>
+                            <option value="Steel">Steel</option>
+                            <option value="Galvanized Iron">Galvanized Iron</option>
+                            <option value="Copper">Copper</option>
+                            <option value="Concrete">Concrete</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="flow_rate">Flow Rate (L/s) <small style="color: var(--text-muted); font-weight: 400;">(Optional)</small></label>
+                        <input type="number" step="0.1" id="flow_rate" name="flow_rate" placeholder="Default: Sensor inlet">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pressure">Pressure (psi) <small style="color: var(--text-muted); font-weight: 400;">(Optional)</small></label>
+                        <input type="number" step="0.1" id="pressure" name="pressure" placeholder="Default: Sensor line">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Run Pipe Assessment & Generate Recommendation
+                </button>
+            </form>
+
+            {% if result %}
+            <div class="result-box-card {% if result.risk >= 60 %}high-risk{% endif %}">
+                <div class="result-header">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #0f172a;">Condition Assessment Summary</h3>
+                    <span class="result-badge">{{ result.risk_level }} Risk ({{ result.risk }}/100)</span>
+                </div>
+
+                <div class="result-meta-grid">
+                    <div class="result-meta-item">
+                        <strong>Brand</strong>
+                        <span>{{ result.brand }}</span>
+                    </div>
+                    <div class="result-meta-item">
+                        <strong>Age</strong>
+                        <span>{{ result.age }} Years</span>
+                    </div>
+                    <div class="result-meta-item">
+                        <strong>Material</strong>
+                        <span>{{ result.material }}</span>
+                    </div>
+                    <div class="result-meta-item">
+                        <strong>Flow Checked</strong>
+                        <span>{{ result.flow_rate }} L/s</span>
+                    </div>
+                    <div class="result-meta-item">
+                        <strong>Pressure</strong>
+                        <span>{{ result.pressure }} psi</span>
+                    </div>
+                </div>
+
+                <strong style="font-size: 13px; color: #334155;">Key Diagnostic Observations:</strong>
+                <ul class="reasons-list">
+                    {% for reason in result.reasons %}
+                        <li>{{ reason }}</li>
+                    {% endfor %}
+                </ul>
+
+                <strong style="font-size: 13px; color: #334155;">Recommended Action Protocol:</strong>
+                <div class="solution-box">
+                    <p style="margin-bottom: 6px;">{{ result.solution }}</p>
+                    <p style="font-weight: 600; color: var(--teal-text);"><strong>Operational directive:</strong> {{ result.action }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <script>
+        let trendChart;
+
+        function initChart() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['50s', '40s', '30s', '20s', '10s', 'Now'],
+                    datasets: [
+                        {
+                            label: 'Flow (L/s)',
+                            data: [44.8, 45.0, 45.2, 45.1, 45.3, 45.2],
+                            borderColor: '#0284c7',
+                            backgroundColor: 'rgba(2, 132, 199, 0.05)',
+                            fill: true,
+                            tension: 0.35,
+                            borderWidth: 2,
+                            pointRadius: 2
+                        },
+                        {
+                            label: 'Pressure (psi)',
+                            data: [63.0, 62.8, 62.9, 62.5, 62.4, 62.5],
+                            borderColor: '#0f766e',
+                            backgroundColor: 'transparent',
+                            tension: 0.35,
+                            borderWidth: 2,
+                            pointRadius: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: { boxWidth: 12, font: { size: 11, family: 'Plus Jakarta Sans' } }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                        y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+
+                document.getElementById('valRisk').innerText = data.risk;
+                document.getElementById('valFlow').innerText = data.flow.toFixed(1);
+                document.getElementById('valPressure').innerText = data.pressure.toFixed(1);
+                document.getElementById('valDevices').innerText = data.devices;
+
+                const cardRisk = document.getElementById('cardRisk');
+                const pipePath = document.getElementById('pipePath');
+                const leakPulse = document.getElementById('leakPulse');
+                const simPill = document.getElementById('simPill');
+
+                if (data.leak_simulated) {
+                    cardRisk.classList.add('alert-active');
+                    document.getElementById('lblRisk').innerText = "Anomaly Alert · High Probability";
+                    pipePath.setAttribute('stroke', '#ef4444');
+                    leakPulse.style.display = 'block';
+                    document.getElementById('leakBtnText').innerText = "Reset Leak";
+                } else {
+                    cardRisk.classList.remove('alert-active');
+                    document.getElementById('lblRisk').innerText = "Nominal · Illustrative score";
+                    pipePath.setAttribute('stroke', '#0284c7');
+                    leakPulse.style.display = 'none';
+                    document.getElementById('leakBtnText').innerText = "Simulate a leak";
+                }
+
+                if (data.demo_paused) {
+                    simPill.innerText = '⏸ Demo Paused';
+                    simPill.className = 'badge-pill pill-tag';
+                    document.getElementById('pauseBtnText').innerText = 'Resume demo';
+                } else {
+                    simPill.innerText = '● Simulation Running';
+                    simPill.className = 'badge-pill pill-running';
+                    document.getElementById('pauseBtnText').innerText = 'Pause demo';
+                }
+
+                if (trendChart && !data.demo_paused) {
+                    trendChart.data.datasets[0].data.shift();
+                    trendChart.data.datasets[0].data.push(data.flow);
+                    trendChart.data.datasets[1].data.shift();
+                    trendChart.data.datasets[1].data.push(data.pressure);
+                    trendChart.update();
+                }
+
+            } catch (err) {
+                console.error("Telemetry sync error:", err);
+            }
+        }
+
+        async function toggleLeak() {
+            await fetch('/api/toggle-leak', { method: 'POST' });
+            fetchStatus();
+        }
+
+        async function toggleDemo() {
+            await fetch('/api/toggle-demo', { method: 'POST' });
+            fetchStatus();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            fetchStatus();
+            setInterval(fetchStatus, 3000);
+        });
+    </script>
+</body>
+</html>

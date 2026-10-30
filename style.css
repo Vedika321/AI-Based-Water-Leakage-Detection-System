@@ -1,0 +1,595 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg-page: #f4f1ea;
+    --sidebar-bg: #14242b;
+    --sidebar-text: #8e9ea4;
+    --sidebar-active: #1d333d;
+    --card-bg: #fdfcf9;
+    --card-border: #e6e2d8;
+    --text-primary: #172023;
+    --text-secondary: #6c7875;
+    --text-muted: #8d9894;
+    --primary-green: #256153;
+    --primary-green-hover: #1c4b40;
+    --accent-orange: #c77943;
+    --tan-badge: #e8e2d5;
+    --tan-badge-text: #665f54;
+    --pill-green-bg: #dbebe2;
+    --pill-green-text: #276254;
+    --pipe-color: #276254;
+    --mono-font: 'DM Mono', monospace;
+    --sans-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--sans-font);
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ============================
+   SIDEBAR
+   ============================ */
+.sidebar {
+    width: 250px;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 10px 32px;
+}
+
+.logo {
+    width: 36px;
+    height: 36px;
+    background-color: #24524c;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8be0cf;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.brand h2 {
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.2px;
+}
+
+.brand small {
+    display: block;
+    font-family: var(--mono-font);
+    font-size: 9px;
+    letter-spacing: 0.8px;
+    color: #63777d;
+    margin-top: 3px;
+}
+
+.nav-title {
+    font-family: var(--mono-font);
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    color: #495e65;
+    padding: 0 12px 10px;
+    font-weight: 500;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    color: #8f9ea3;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.15s ease;
+}
+
+.nav:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+}
+
+.nav.active {
+    background-color: var(--sidebar-active);
+    color: #ffffff;
+    border-left: 2.5px solid #4cdbbd;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+    padding: 14px 12px;
+    font-size: 12px;
+    color: #7d8f95;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px solid #1c2e36;
+}
+
+.sidebar-bottom small {
+    font-family: var(--mono-font);
+    font-size: 9px;
+    letter-spacing: 0.6px;
+    color: #4d6067;
+}
+
+/* ============================
+   MAIN CONTENT
+   ============================ */
+.main {
+    margin-left: 250px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Topbar */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 48px;
+    font-family: var(--mono-font);
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    color: #7b8682;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.topbar b {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.top-tags {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Pills & Badges */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+}
+
+.pill.green {
+    background-color: var(--pill-green-bg);
+    color: var(--pill-green-text);
+}
+
+.pill.tan {
+    background-color: var(--tan-badge);
+    color: var(--tan-badge-text);
+}
+
+.green-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #279e7a;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Page Heading */
+.page-heading {
+    position: relative;
+    padding: 32px 48px 24px;
+}
+
+.eyebrow {
+    font-family: var(--mono-font);
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.page-heading h1 {
+    font-size: 34px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 14.5px;
+    font-weight: 400;
+    max-width: 650px;
+}
+
+.heading-buttons {
+    position: absolute;
+    right: 48px;
+    bottom: 24px;
+    display: flex;
+    gap: 10px;
+}
+
+/* Buttons */
+.button {
+    font-family: var(--sans-font);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.button.light {
+    background: #ffffff;
+    border: 1px solid #dcd7cb;
+    color: #424e4a;
+}
+
+.button.light:hover {
+    background: #f7f5ef;
+    border-color: #cbc5b7;
+}
+
+.button.primary {
+    background-color: var(--primary-green);
+    color: #ffffff;
+}
+
+.button.primary:hover {
+    background-color: var(--primary-green-hover);
+}
+
+/* ============================
+   METRIC CARDS
+   ============================ */
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 0 48px 28px;
+}
+
+.metric {
+    position: relative;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+}
+
+/* Top-right corner cutout from screenshot */
+.metric::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 48px;
+    height: 48px;
+    background: #edf1e8;
+    border-radius: 0 0 0 100%;
+    pointer-events: none;
+}
+
+.metric p {
+    font-family: var(--mono-font);
+    font-size: 10.5px;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.metric h2 {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.1;
+    margin-bottom: 8px;
+    font-feature-settings: "tnum";
+}
+
+.metric h2 small {
+    font-size: 15px;
+    font-weight: 400;
+    color: #8c9793;
+}
+
+.metric span {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    display: block;
+}
+
+/* ============================
+   DASHBOARD GRID & CARDS
+   ============================ */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 0.85fr;
+    gap: 20px;
+    padding: 0 48px 40px;
+    align-items: stretch;
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.card-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 22px 24px 14px;
+}
+
+.card-heading h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.card-heading p {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ============================
+   NETWORK SCHEMATIC VIEW
+   ============================ */
+.network-map {
+    position: relative;
+    flex: 1;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px 24px;
+}
+
+.network-map svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.map-label {
+    position: absolute;
+    font-family: var(--mono-font);
+    font-size: 9.5px;
+    letter-spacing: 0.8px;
+    color: #798b84;
+    font-weight: 500;
+    pointer-events: none;
+}
+
+.map-label.north { top: 75px; left: 160px; }
+.map-label.east { top: 60px; right: 230px; }
+.map-label.river { bottom: 65px; left: 240px; }
+
+.pipe {
+    fill: none;
+    stroke: var(--pipe-color);
+    stroke-width: 4.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.pipe-nodes circle {
+    fill: #ffffff;
+    stroke: var(--pipe-color);
+    stroke-width: 3.5;
+}
+
+.map-legend {
+    display: flex;
+    gap: 18px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    align-items: center;
+}
+
+.map-legend .orange {
+    color: var(--accent-orange);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    border-top: 1px solid #f0ecdf;
+    font-family: var(--mono-font);
+    font-size: 10.5px;
+    letter-spacing: 0.5px;
+    color: #8c9793;
+}
+
+/* ============================
+   CHART CARD
+   ============================ */
+.chart-container {
+    height: 220px;
+    padding: 8px 24px;
+    position: relative;
+}
+
+.chart-reset {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.chart-reset:hover {
+    color: var(--text-primary);
+    background-color: #eee9dc;
+}
+
+.chart-legend {
+    display: flex;
+    gap: 16px;
+    padding: 12px 24px 8px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+}
+
+.flow-key { color: var(--primary-green); font-weight: 500; }
+.pressure-key { color: #cf913e; font-weight: 500; }
+.threshold-key { color: #d7a477; font-weight: 500; }
+
+.chart-note {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 24px 18px;
+    font-family: var(--mono-font);
+    font-size: 10px;
+    color: var(--text-muted);
+    border-top: 1px solid #f0ecdf;
+}
+
+/* ============================
+   FOOTER
+   ============================ */
+footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 24px 48px;
+    font-family: var(--mono-font);
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    color: #9ba7a1;
+    border-top: 1px solid #e7e2d7;
+    margin-top: auto;
+}
+
+/* ============================
+   PIPE ANALYSIS FORM / MODAL CARD
+   (Preserves your backend POST /analyze-pipe)
+   ============================ */
+.analysis-section {
+    padding: 0 48px 30px;
+}
+
+.analysis-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.analysis-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-family: var(--mono-font);
+    font-size: 10.5px;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.form-group input, 
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 13.5px;
+    border: 1px solid #d5cfc2;
+    border-radius: 6px;
+    background: #fcfbf9;
+    color: var(--text-primary);
+    font-family: var(--sans-font);
+    outline: none;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 2px rgba(39, 98, 84, 0.15);
+}
+
+.result-box {
+    margin-top: 20px;
+    padding: 18px;
+    background: #f7f4ec;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-green);
+}
+
+.result-box.high { border-left-color: #d9534f; }
+.result-box.medium { border-left-color: #f0ad4e; }
+
+/* Responsive adjustments */
+@media (max-width: 1100px) {
+    .sidebar { width: 72px; padding: 20px 8px; }
+    .sidebar .brand div, .sidebar .nav-title, .sidebar-bottom, .nav span.nav-text { display: none; }
+    .main { margin-left: 72px; }
+    .metrics { grid-template-columns: repeat(2, 1fr); padding: 0 24px 20px; }
+    .dashboard-grid { grid-template-columns: 1fr; padding: 0 24px 24px; }
+    .page-heading { padding: 24px; }
+    .topbar { padding: 16px 24px; }
+    .heading-buttons { position: static; margin-top: 18px; }
+}
